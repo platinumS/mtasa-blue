@@ -19,7 +19,9 @@
 ////////////////////////////////////////////////
 namespace
 {
-    #define     ARRAY_ModelInfo                 0xA9B0C8
+	//Platinum Edit new ARRAY_ModelInfo pointer
+	//static const DWORD		ARRAY_ModelInfo = (*(int*)(0x40122D));
+	//#define     ARRAY_ModelInfo                 0xA9B0C8 // ##SA##
     #define     LOW_LOD_DRAW_DISTANCE_SCALE     5
 
 

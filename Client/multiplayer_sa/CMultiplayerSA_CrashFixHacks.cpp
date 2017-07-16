@@ -171,12 +171,17 @@ void _declspec(naked) HOOK_CrashFix_Misc5 ()
 {
     _asm
     {
-        mov     edi, dword ptr [ecx*4+0A9B0C8h]
+		//Platinum Edit
+		mov		edi, ARRAY_ModelInfo
+		mov     edi, dword ptr[ecx * 4 + edi]
+        //mov     edi, dword ptr [ecx*4+0A9B0C8h]
         mov     edi, dword ptr [edi+5Ch]     
         test    edi, edi 
         je      cont        // Skip much code if edi is zero (ped has no model)
 
-        mov     edi, dword ptr [ecx*4+0A9B0C8h]
+		mov		edi, ARRAY_ModelInfo
+		mov     edi, dword ptr[ecx * 4 + edi]
+        //mov     edi, dword ptr [ecx*4+0A9B0C8h]
         jmp     RETURN_CrashFix_Misc5
     cont:
         CRASH_AVERTED( 5 )
@@ -1148,8 +1153,8 @@ struct CStreamingInfo
 
 CStreamingInfo* GetStreamingInfoFromModelId( uint id )
 {
-    CStreamingInfo* pItemInfo = (CStreamingInfo*)(0x8E4CC0);
-    return pItemInfo + id;
+	CStreamingInfo* pItemInfo = *(CStreamingInfo**)(0x408ADA + 3);
+	return pItemInfo + id;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1215,7 +1220,10 @@ void _declspec(naked) HOOK_CEntity_GetBoundRect()
         popad
 
         // Continue replaced code
-        mov     ecx,dword ptr [eax*4+0A9B0C8h] 
+		//Platinum Edit 11.0
+		mov edx, ARRAY_ModelInfo
+		mov     ecx, dword ptr[eax * 4 + edx]
+        //mov     ecx,dword ptr [eax*4+0A9B0C8h] 
         jmp     RETURN_CEntity_GetBoundRect
     }
 }
@@ -1466,7 +1474,10 @@ void _declspec(naked) HOOK_CAnimManager_CreateAnimAssocGroups()
         popad
 
         // Replaced code
-        mov     eax, 0x0A9B0C8[eax*4] 
+		//Platinum Edit 11.1
+		mov ecx, ARRAY_ModelInfo
+		mov     eax, [ecx + eax * 4]
+        //mov     eax, 0x0A9B0C8[eax*4] 
         jmp     RETURN_CAnimManager_CreateAnimAssocGroups
     }
 }

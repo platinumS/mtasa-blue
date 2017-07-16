@@ -137,7 +137,11 @@ bool _cdecl OnCallCStreamingInfoAddToList ( int flags, SImgGTAItemInfo* pImgGTAI
     if ( !CMultiplayerSA::ms_PlayerImgCachePtr )
         return false;
 
-    if ( pImgGTAInfo->ucImgId == 5 )
+	//Platinum Edit 15.2:
+	// Check that Player.img has been added to the CImgDescriptor array
+	uchar ucPlayerImgID = *(int*)(0x008E48D8);
+
+    if (ucPlayerImgID != 0 && pImgGTAInfo->ucImgId == ucPlayerImgID)
     {
         // If bLoadingBigModel is set, try to get it unset
         #define VAR_CStreaming_bLoadingBigModel     0x08E4A58
@@ -150,7 +154,9 @@ bool _cdecl OnCallCStreamingInfoAddToList ( int flags, SImgGTAItemInfo* pImgGTAI
             assert ( !bLoadingBigModel );
         }
 
-        int iFileId = ((int)pImgGTAInfo - 0x08E4CC0) / 20;
+		//Platinum Edit for ModelInfo - CStreaming::ms_aInfoForModel 11.4
+		int iFileId = ((int)pImgGTAInfo - *(int*)(0x408ADA + 3)) / 0x14;
+        //int iFileId = ((int)pImgGTAInfo - 0x08E4CC0) / 20;
 
         iReturnFileId = iFileId;
         pReturnBuffer = CMultiplayerSA::ms_PlayerImgCachePtr + pImgGTAInfo->iBlockOffset * 2048;
