@@ -93,7 +93,6 @@ static const int MODELINFO_MAX = (*(int*)(0x5B8AFA + 2) - *(int*)(0x408ADA + 3))
 #define PROP_RANDOM_FOLIAGE         "randomfoliage"
 #define PROP_SNIPER_MOON            "snipermoon"
 #define PROP_EXTRA_AIR_RESISTANCE   "extraairresistance"
-
 struct SCheatSA {
     BYTE*   m_byAddress; //Cheat Address
     bool    m_bEnabled; //Cheat State

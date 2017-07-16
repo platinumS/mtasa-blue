@@ -592,7 +592,6 @@ bool CGameSA::IsCheatEnabled ( const char* szCheatName )
 {
     if (!strcmp ( szCheatName, PROP_RANDOM_FOLIAGE ))
         return IsRandomFoliageEnabled ();
-
     if ( !strcmp ( szCheatName, PROP_SNIPER_MOON ) )
         return IsMoonEasterEggEnabled ();
 
