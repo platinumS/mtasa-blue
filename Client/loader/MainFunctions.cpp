@@ -566,7 +566,6 @@ void HandleIfGTAIsAlreadyRunning( void )
     {
         if ( MessageBoxUTF8 ( 0, _("An instance of GTA: San Andreas is already running. It needs to be terminated before MTA:SA can be started. Do you want to do that now?"), _("Information")+_E("CL10"), MB_YESNO | MB_ICONQUESTION | MB_TOPMOST ) == IDYES )
         {
-            TerminateOtherMTAIfRunning();
             TerminateGTAIfRunning ();
             if ( IsGTARunning () )
             {
@@ -839,7 +838,7 @@ void CheckDataFiles( void )
 
     // Check for asi files
     {
-        bool bFoundInGTADir = !FindFiles( PathJoin( strGTAPath, "*.asi" ), true, false ).empty();
+		bool bFoundInGTADir = false;//!FindFiles( PathJoin( strGTAPath, "*.asi" ), true, false ).empty();
         bool bFoundInMTADir = !FindFiles( PathJoin( strMTASAPath, "mta", "*.asi" ), true, false ).empty();
         if ( bFoundInGTADir || bFoundInMTADir )
         {
@@ -849,11 +848,14 @@ void CheckDataFiles( void )
     }
 
     // Warning if d3d9.dll exists in the GTA install directory
-    if ( FileExists( PathJoin ( strGTAPath, "d3d9.dll" ) ) )
+	//Platinum Edit - Remove check for d3d9.dll.
+    /*
+	if ( FileExists( PathJoin ( strGTAPath, "d3d9.dll" ) ) )
     {
         ShowD3dDllDialog ( g_hInstance, PathJoin ( strGTAPath, "d3d9.dll" ) );
         HideD3dDllDialog ();
     }
+	*/
 
     // Remove old log files saved in the wrong place
     SString strMtaDir = PathJoin( strMTASAPath, "mta" );
@@ -1034,17 +1036,17 @@ BOOL CreateProcessWithMitigationPolicy (
         }
     }
 #endif
-    // Start GTA
-    BOOL bResult = _CreateProcessW ( lpApplicationName,
-                            lpCommandLine,
-                            lpProcessAttributes,
-                            lpThreadAttributes,
-                            bInheritHandles,
-                            dwCreationFlags,
-                            nullptr,
-                            lpCurrentDirectory,
-                            (LPSTARTUPINFOW)&StartupInfoEx,
-                            lpProcessInformation );
+	// Start GTA
+	BOOL bResult = _CreateProcessW(lpApplicationName,
+		lpCommandLine,
+		lpProcessAttributes,
+		lpThreadAttributes,
+		bInheritHandles,
+		dwCreationFlags,
+		nullptr,
+		lpCurrentDirectory,
+		(LPSTARTUPINFOW)&StartupInfoEx,
+		lpProcessInformation);
 
     if ( bResult == FALSE )
     {

@@ -698,6 +698,12 @@ void SetMTASAPathSource ( bool bReadFromRegistry )
         SetRegistryValue ( "", "Last Run Path Hash", strHash );
         SetRegistryValue ( "", "Last Run Path Version", MTA_DM_ASE_VERSION );
 
+        // Also save for legacy 1.0 to see
+        SString strThisVersion = SStringX ( MTA_DM_ASE_VERSION ).TrimEnd ( "n" );
+        SetVersionRegistryValueLegacy ( strThisVersion, "", "Last Run Path", strLaunchPathFilename );
+        SetVersionRegistryValueLegacy ( strThisVersion, "", "Last Run Path Hash", strHash );
+        SetVersionRegistryValueLegacy ( strThisVersion, "", "Last Run Path Version", MTA_DM_ASE_VERSION );
+
         // Strip the module name out of the path.
         SString strLaunchPath = GetLaunchPath();
 
@@ -785,7 +791,24 @@ ePathResult GetGamePath ( SString& strOutResult, bool bFindIfMissing )
     std::vector < SString > pathList;
 
     // Try HKLM "SOFTWARE\\Multi Theft Auto: San Andreas All\\Common\\"
-    pathList.push_back ( GetCommonRegistryValue ( "", "GTA:SA Path" ) );
+    //pathList.push_back ( GetCommonRegistryValue ( "", "GTA:SA Path" ) );
+    // Then HKCU "SOFTWARE\\Multi Theft Auto: San Andreas 1.0\\"
+    //pathList.push_back ( GetVersionRegistryValueLegacy ( "1.0", "", "GTA:SA Path" ) );
+    // Then HKCU "SOFTWARE\\Multi Theft Auto: San Andreas 1.1\\"
+    //pathList.push_back ( GetVersionRegistryValueLegacy ( "1.1", "", "GTA:SA Path Backup" ) );
+
+	//Platinum Edit - Ensure that custom files are always enabled = otherwise MTA:S:
+	int bEnableCustomFiles = GetApplicationSettingInt("customized-sa-files-request");
+	if (bEnableCustomFiles != 1) {
+		SetApplicationSettingInt("customized-sa-files-request", 1);
+	}
+
+	// Try HKLM "SOFTWARE\\Multi Theft Auto: San Andreas All\\Common\\"
+	pathList.push_back(GetCommonRegistryValue("", "GTA:SAxVCxLC Path"));
+	// Then HKCU "SOFTWARE\\Multi Theft Auto: San Andreas 1.0\\"
+	pathList.push_back(GetVersionRegistryValueLegacy("1.0", "", "GTA:SAxVCxLC Path"));
+	// Then HKCU "SOFTWARE\\Multi Theft Auto: San Andreas 1.1\\"
+	pathList.push_back(GetVersionRegistryValueLegacy("1.1", "", "GTA:SAxVCxLC Path Backup"));
 
     // Unicode character check on first one
     if ( strlen( pathList[0].c_str () ) )
@@ -795,32 +818,35 @@ ePathResult GetGamePath ( SString& strOutResult, bool bFindIfMissing )
             return GAME_PATH_UNICODE_CHARS;
     }
 
-
     // Then step through looking for an existing file
     bool bFoundSteamExe = false;
     SString strRegPath;
-    for ( uint i = 0 ; i < pathList.size (); i++ )
-    {
-        if ( pathList[i].empty() )
-            continue;
 
-        if ( FileExists( PathJoin ( pathList[i], MTA_GTAEXE_NAME ) ) )
-        {
-            strRegPath = pathList[i];
-            break;
-        }
-        if ( FileExists( PathJoin ( pathList[i], MTA_GTASTEAMEXE_NAME ) ) )
-        {
-            bFoundSteamExe = true;
-        }
-    }
+	//Platinum Edit - Change Install Dir
+	for (uint i = 0; i < pathList.size(); i++)
+	{
+		if (pathList[i].empty())
+			continue;
+
+		if (FileExists(PathJoin(pathList[i], MTA_GTAEXE_NAME)))
+		{
+			strRegPath = pathList[i];
+			break;
+		}
+		if (FileExists(PathJoin(pathList[i], MTA_GTASTEAMEXE_NAME)))
+		{
+			bFoundSteamExe = true;
+		}
+	}
 
     // Found an exe?
     if ( !strRegPath.empty () )
     {
         strOutResult = strRegPath;
         // Update registry.
-        SetCommonRegistryValue ( "", "GTA:SA Path", strOutResult );
+        //SetCommonRegistryValue ( "", "GTA:SA Path", strOutResult );
+		//Platinum Edit - Add new Regiostery Value
+		SetCommonRegistryValue("", "GTA:SAxVCxLC Path", strOutResult);
         return GAME_PATH_OK;
     }
 
@@ -837,7 +863,9 @@ ePathResult GetGamePath ( SString& strOutResult, bool bFindIfMissing )
 
     // Ask user to browse for GTA
     BROWSEINFOW bi = { 0 };
-    WString strMessage = _("Select your Grand Theft Auto: San Andreas Installation Directory");
+    //WString strMessage = _("Select your Grand Theft Auto: San Andreas Installation Directory");
+	WString strMessage = _("Select your Grand Theft Auto: SAxVCxLC Installation Directory");
+
     bi.lpszTitle = strMessage;
     LPITEMIDLIST pidl = SHBrowseForFolderW ( &bi );
 
@@ -879,7 +907,10 @@ ePathResult GetGamePath ( SString& strOutResult, bool bFindIfMissing )
     }
 
     // File found. Update registry.
-    SetCommonRegistryValue ( "", "GTA:SA Path", strOutResult );
+	//SetCommonRegistryValue ( "", "GTA:SA Path", strOutResult );
+	//Platinum Edit - Add new Regiostery Value
+	SetCommonRegistryValue("", "GTA:SAxVCxLC Path", strOutResult);
+
     return GAME_PATH_OK;
 }
 
@@ -1118,6 +1149,20 @@ bool IsWindows10Threshold2OrGreater ( void )
 {
     SOSVersionInfo info = GetRealOSVersion ();
     return info.dwMajor > 10 || ( info.dwMajor == 10 && info.dwBuild >= 10586 );
+}
+
+
+///////////////////////////////////////////////////////////////
+//
+// IsVS2013RuntimeInstalled
+//
+// Only checks registry settings, so install could still be invalid
+//
+///////////////////////////////////////////////////////////////
+bool IsVS2013RuntimeInstalled( void )
+{
+    SString strInstall = GetSystemRegistryValue( (uint)HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\DevDiv\\vc\\Servicing\\12.0\\RuntimeMinimum", "Install" );
+    return strInstall == "\x01";
 }
 
 
