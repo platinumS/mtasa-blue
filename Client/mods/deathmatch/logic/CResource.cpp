@@ -118,7 +118,8 @@ CResource::~CResource ( void )
     m_pResourceGUIEntity = NULL;
 
     // Undo all changes to water
-    g_pGame->GetWaterManager ()->UndoChanges ( this );
+//Platinum Edit 17.1 - We depend on FLA for water anyway...
+//    g_pGame->GetWaterManager ()->UndoChanges ( this );
 
     // Cancel all downloads started by this resource
     if ( g_pClientGame->GetSingularFileDownloadManager () )

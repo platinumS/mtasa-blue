@@ -628,10 +628,11 @@ bool CClientEntity::IsOutOfBounds ( void )
 {
     CVector vecPosition;
     GetPosition ( vecPosition );
-
-    return ( vecPosition.fX < -3000.0f || vecPosition.fX > 3000.0f ||
-             vecPosition.fY < -3000.0f || vecPosition.fY > 3000.0f ||
-             vecPosition.fZ < -3000.0f || vecPosition.fZ > 3000.0f );
+	//Platinum Edit 15.7 - use to be 3000.0f
+	float fWorldBounds = 12000.f; 
+    return ( vecPosition.fX < -fWorldBounds || vecPosition.fX > fWorldBounds ||
+             vecPosition.fY < -fWorldBounds || vecPosition.fY > fWorldBounds ||
+             vecPosition.fZ < -fWorldBounds || vecPosition.fZ > fWorldBounds);
 }
     
 
