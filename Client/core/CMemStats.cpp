@@ -236,7 +236,7 @@ namespace
             for ( uint i = 0 ; i < m_ColumnList.size () ; i++ )
             {
                 const SColumn& column = m_ColumnList[i];
-                g_pGraphics->DrawStringQueued ( fX, fY, fX + column.uiWidth, fY, 0xFFFFFFFF, column.strText, 1, 1, DT_NOCLIP | column.uiAlignment, NULL, true, true );
+                g_pGraphics->DrawTextQueued ( fX, fY, fX + column.uiWidth, fY, 0xFFFFFFFF, column.strText, 1, 1, DT_NOCLIP | column.uiAlignment, NULL, true, true );
                 fX += column.uiWidth;
             }
         }
@@ -488,8 +488,20 @@ void CMemStats::SampleState ( SMemStatsInfo& memStatsInfo )
     memStatsInfo.iStreamingMemoryUsed                  = *(int*)0x08E4CB4;
     memStatsInfo.iStreamingMemoryAvailable             = *(int*)0x08A5A80;
 
+	//New Platinum Constants - Settings 14.1
+	int MAX_MODEL_ID = (*(int*)(0x5B8AFA + 2) - *(int*)(0x408ADA + 3)) / 0x14;
+	int TXD_BASE_ID = *(int*)(0x407104 + 2);
+	int COL_BASE_ID = *(int*)(0x410344 + 2);
+	int IPL_BASE_ID = *(int*)(0x4044F4 + 2);
+	int DAT_BASE_ID = *(int*)(0x44E4C4 + 1);
+	int IFP_BASE_ID = *(int*)(0x40C1A4 + 1);
+	int RRR_BASE_ID = *(int*)(0x4594A1 + 2);
+	int TYPE_SCM_BASE_ID = *(int*)(0x40C1C4 + 1);
+
     uint* pModelInfoArray = (uint*)0x08E4CC0;
     for ( uint i = 0 ; i < 25755 ; i++ )
+
+    for ( uint i = 0 ; i < MAX_MODEL_ID; i++ )
     {
         uint* pModelInfo = pModelInfoArray + 5 * i;
         uint uiLoadedFlag = pModelInfo[4];
@@ -503,12 +515,12 @@ void CMemStats::SampleState ( SMemStatsInfo& memStatsInfo )
             else if ( i < 612 )     memStatsInfo.modelInfo.uiVehicles_400_611++;
             else if ( i < 1000 )    memStatsInfo.modelInfo.uiUnknown_612_999++;
             else if ( i < 1194 )    memStatsInfo.modelInfo.uiUpgrades_1000_1193++;
-            else if ( i < 20000 )   memStatsInfo.modelInfo.uiUnknown_1194_19999++;
-            else if ( i < 25000 )   memStatsInfo.modelInfo.uiTextures_20000_24999++;
-            else if ( i < 25255 )   memStatsInfo.modelInfo.uiCollisions_25000_25254++;
-            else if ( i < 25511 )   memStatsInfo.modelInfo.uiIpls_25255_25510++;
-            else if ( i < 25575 )   memStatsInfo.modelInfo.uiPaths_25511_25574++;
-            else if ( i < 25755 )   memStatsInfo.modelInfo.uiAnims_25575_25754++;
+            else if ( i < TXD_BASE_ID)   memStatsInfo.modelInfo.uiUnknown_1194_19999++;
+            else if ( i < COL_BASE_ID)   memStatsInfo.modelInfo.uiTextures_20000_24999++;
+            else if ( i < IPL_BASE_ID)   memStatsInfo.modelInfo.uiCollisions_25000_25254++;
+            else if ( i < DAT_BASE_ID)   memStatsInfo.modelInfo.uiIpls_25255_25510++;
+            else if ( i < IFP_BASE_ID)   memStatsInfo.modelInfo.uiPaths_25511_25574++;
+            else if ( i < RRR_BASE_ID)   memStatsInfo.modelInfo.uiAnims_25575_25754++;
         }
     }
 
