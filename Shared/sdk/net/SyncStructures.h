@@ -20,6 +20,13 @@
 #define SYNC_POSITION_LIMIT 100000.0f
 // Note: Using SFloatSync < 14, 10 > also limits the range from -8191 to 8192
 
+//Platinum Edit - 14.0
+static const int myFloatX = 15;
+static const int myFloatY = 10;
+//(((fX + 16384.0f) / 32768.0f) * 65535.0f);
+static const float myf16b = 32768.0f; //Previously 16384.0f
+static const float myf8b = 16384.0f; //Previously 8192.0f
+
 #pragma pack(push)
 #pragma pack(1)
 
@@ -221,59 +228,59 @@ struct SObjectHealthSync : public SFloatAsBitsSync < 11 >
 //////////////////////////////////////////
 struct SPositionSync : public ISyncStructure
 {
-    SPositionSync ( bool bUseFloats = false ) : m_bUseFloats ( bUseFloats ) {}
+	SPositionSync(bool bUseFloats = false) : m_bUseFloats(bUseFloats) {}
 
-    bool Read ( NetBitStreamInterface& bitStream )
-    {
-        if ( m_bUseFloats )
-        {
-            return bitStream.Read ( data.vecPosition.fX ) && bitStream.Read ( data.vecPosition.fY ) && bitStream.Read ( data.vecPosition.fZ ) &&
-                    data.vecPosition.fX > -SYNC_POSITION_LIMIT && data.vecPosition.fX < SYNC_POSITION_LIMIT &&
-                    data.vecPosition.fY > -SYNC_POSITION_LIMIT && data.vecPosition.fY < SYNC_POSITION_LIMIT &&
-                    data.vecPosition.fZ > -SYNC_POSITION_LIMIT && data.vecPosition.fZ < SYNC_POSITION_LIMIT;
-        }
-        else
-        {
-            SFloatSync < 14, 10 > x, y;
+	bool Read(NetBitStreamInterface& bitStream)
+	{
+		if (m_bUseFloats)
+		{
+			return bitStream.Read(data.vecPosition.fX) && bitStream.Read(data.vecPosition.fY) && bitStream.Read(data.vecPosition.fZ) &&
+				data.vecPosition.fX > -SYNC_POSITION_LIMIT && data.vecPosition.fX < SYNC_POSITION_LIMIT &&
+				data.vecPosition.fY > -SYNC_POSITION_LIMIT && data.vecPosition.fY < SYNC_POSITION_LIMIT &&
+				data.vecPosition.fZ > -SYNC_POSITION_LIMIT && data.vecPosition.fZ < SYNC_POSITION_LIMIT;
+		}
+		else
+		{
+			SFloatSync < myFloatX, myFloatY> x, y;
 
-            if ( bitStream.Read ( &x ) && bitStream.Read ( &y ) && bitStream.Read ( data.vecPosition.fZ ) )
-            {
-                data.vecPosition.fX = x.data.fValue;
-                data.vecPosition.fY = y.data.fValue;
-                if ( x.data.fValue > -SYNC_POSITION_LIMIT && x.data.fValue < SYNC_POSITION_LIMIT &&
-                     y.data.fValue > -SYNC_POSITION_LIMIT && y.data.fValue < SYNC_POSITION_LIMIT &&
-                     data.vecPosition.fZ > -SYNC_POSITION_LIMIT && data.vecPosition.fZ < SYNC_POSITION_LIMIT )
-                    return true;
-            }
-        }
+			if (bitStream.Read(&x) && bitStream.Read(&y) && bitStream.Read(data.vecPosition.fZ))
+			{
+				data.vecPosition.fX = x.data.fValue;
+				data.vecPosition.fY = y.data.fValue;
+				if (x.data.fValue > -SYNC_POSITION_LIMIT && x.data.fValue < SYNC_POSITION_LIMIT &&
+					y.data.fValue > -SYNC_POSITION_LIMIT && y.data.fValue < SYNC_POSITION_LIMIT &&
+					data.vecPosition.fZ > -SYNC_POSITION_LIMIT && data.vecPosition.fZ < SYNC_POSITION_LIMIT)
+					return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    void Write ( NetBitStreamInterface& bitStream ) const
-    {
-        if ( m_bUseFloats )
-        {
-            bitStream.Write ( Clamp ( -SYNC_POSITION_LIMIT + 1, data.vecPosition.fX, SYNC_POSITION_LIMIT - 1 ) );
-            bitStream.Write ( Clamp ( -SYNC_POSITION_LIMIT + 1, data.vecPosition.fY, SYNC_POSITION_LIMIT - 1 ) );
-            bitStream.Write ( Clamp ( -SYNC_POSITION_LIMIT + 1, data.vecPosition.fZ, SYNC_POSITION_LIMIT - 1 ) );
-        }
-        else
-        {
-            SFloatSync < 14, 10 > x, y;
-            x.data.fValue = data.vecPosition.fX;
-            y.data.fValue = data.vecPosition.fY;
+	void Write(NetBitStreamInterface& bitStream) const
+	{
+		if (m_bUseFloats)
+		{
+			bitStream.Write(Clamp(-SYNC_POSITION_LIMIT + 1, data.vecPosition.fX, SYNC_POSITION_LIMIT - 1));
+			bitStream.Write(Clamp(-SYNC_POSITION_LIMIT + 1, data.vecPosition.fY, SYNC_POSITION_LIMIT - 1));
+			bitStream.Write(Clamp(-SYNC_POSITION_LIMIT + 1, data.vecPosition.fZ, SYNC_POSITION_LIMIT - 1));
+		}
+		else
+		{
+			SFloatSync < myFloatX, myFloatY> x, y;
+			x.data.fValue = data.vecPosition.fX;
+			y.data.fValue = data.vecPosition.fY;
 
-            bitStream.Write ( &x );
-            bitStream.Write ( &y );
-            bitStream.Write ( Clamp ( -SYNC_POSITION_LIMIT + 1, data.vecPosition.fZ, SYNC_POSITION_LIMIT - 1 ) );
-        }
-    }
+			bitStream.Write(&x);
+			bitStream.Write(&y);
+			bitStream.Write(Clamp(-SYNC_POSITION_LIMIT + 1, data.vecPosition.fZ, SYNC_POSITION_LIMIT - 1));
+		}
+	}
 
-    struct
-    {
-        CVector vecPosition;
-    } data;
+	struct
+	{
+		CVector vecPosition;
+	} data;
 
 private:
     bool m_bUseFloats;
@@ -281,55 +288,55 @@ private:
 
 struct SPosition2DSync : public ISyncStructure
 {
-    SPosition2DSync ( bool bUseFloats = false ) : m_bUseFloats ( bUseFloats ) {}
+	SPosition2DSync(bool bUseFloats = false) : m_bUseFloats(bUseFloats) {}
 
-    bool Read ( NetBitStreamInterface& bitStream )
-    {
-        if ( m_bUseFloats )
-        {
-            return bitStream.Read ( data.vecPosition.fX ) && bitStream.Read ( data.vecPosition.fY ) &&
-                    data.vecPosition.fX > -SYNC_POSITION_LIMIT && data.vecPosition.fX < SYNC_POSITION_LIMIT &&
-                    data.vecPosition.fY > -SYNC_POSITION_LIMIT && data.vecPosition.fY < SYNC_POSITION_LIMIT;
-        }
-        else
-        {
-            SFloatSync < 14, 10 > x, y;
+	bool Read(NetBitStreamInterface& bitStream)
+	{
+		if (m_bUseFloats)
+		{
+			return bitStream.Read(data.vecPosition.fX) && bitStream.Read(data.vecPosition.fY) &&
+				data.vecPosition.fX > -SYNC_POSITION_LIMIT && data.vecPosition.fX < SYNC_POSITION_LIMIT &&
+				data.vecPosition.fY > -SYNC_POSITION_LIMIT && data.vecPosition.fY < SYNC_POSITION_LIMIT;
+		}
+		else
+		{
+			SFloatSync < myFloatX, myFloatY> x, y;
 
-            if ( bitStream.Read ( &x ) && bitStream.Read ( &y ) )
-            {
-                data.vecPosition.fX = x.data.fValue;
-                data.vecPosition.fY = y.data.fValue;
-                if ( x.data.fValue > -SYNC_POSITION_LIMIT && x.data.fValue < SYNC_POSITION_LIMIT &&
-                     y.data.fValue > -SYNC_POSITION_LIMIT && y.data.fValue < SYNC_POSITION_LIMIT )
-                    return true;
-            }
-        }
+			if (bitStream.Read(&x) && bitStream.Read(&y))
+			{
+				data.vecPosition.fX = x.data.fValue;
+				data.vecPosition.fY = y.data.fValue;
+				if (x.data.fValue > -SYNC_POSITION_LIMIT && x.data.fValue < SYNC_POSITION_LIMIT &&
+					y.data.fValue > -SYNC_POSITION_LIMIT && y.data.fValue < SYNC_POSITION_LIMIT)
+					return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    void Write ( NetBitStreamInterface& bitStream ) const
-    {
-        if ( m_bUseFloats )
-        {
-            bitStream.Write ( Clamp ( -SYNC_POSITION_LIMIT + 1, data.vecPosition.fX, SYNC_POSITION_LIMIT - 1 ) );
-            bitStream.Write ( Clamp ( -SYNC_POSITION_LIMIT + 1, data.vecPosition.fY, SYNC_POSITION_LIMIT - 1 ) );
-        }
-        else
-        {
-            SFloatSync < 14, 10 > x, y;
-            x.data.fValue = data.vecPosition.fX;
-            y.data.fValue = data.vecPosition.fY;
+	void Write(NetBitStreamInterface& bitStream) const
+	{
+		if (m_bUseFloats)
+		{
+			bitStream.Write(Clamp(-SYNC_POSITION_LIMIT + 1, data.vecPosition.fX, SYNC_POSITION_LIMIT - 1));
+			bitStream.Write(Clamp(-SYNC_POSITION_LIMIT + 1, data.vecPosition.fY, SYNC_POSITION_LIMIT - 1));
+		}
+		else
+		{
+			SFloatSync < myFloatX, myFloatY> x, y;
+			x.data.fValue = data.vecPosition.fX;
+			y.data.fValue = data.vecPosition.fY;
 
-            bitStream.Write ( &x );
-            bitStream.Write ( &y );
-        }
-    }
+			bitStream.Write(&x);
+			bitStream.Write(&y);
+		}
+	}
 
-    struct
-    {
-        CVector2D vecPosition;
-    } data;
+	struct
+	{
+		CVector2D vecPosition;
+	} data;
 
 private:
     bool m_bUseFloats;
@@ -340,39 +347,39 @@ private:
 // - Write Z bound to [-110, 1938], with a max error of 1 unit.
 struct SLowPrecisionPositionSync : public ISyncStructure
 {
-    bool Read ( NetBitStreamInterface& bitStream )
-    {
-        unsigned short usX;
-        unsigned short usY;
-        unsigned short usZ;
+	bool Read(NetBitStreamInterface& bitStream)
+	{
+		unsigned short usX;
+		unsigned short usY;
+		unsigned short usZ;
 
-        if ( !bitStream.Read ( usX ) || !bitStream.Read ( usY ) || !bitStream.ReadBits ( reinterpret_cast<char *>(&usZ), 11 ) )
-            return false;
-        data.vecPosition.fX = 16384.0f * (usX / 65535.0f) - 8192.0f;
-        data.vecPosition.fY = 16384.0f * (usY / 65535.0f) - 8192.0f;
-        data.vecPosition.fZ = static_cast < float > ( usZ ) - 110.0f;
-        return true;
-    }
+		if (!bitStream.Read(usX) || !bitStream.Read(usY) || !bitStream.ReadBits(reinterpret_cast<char *>(&usZ), 11))
+			return false;
+		data.vecPosition.fX = myf16b * (usX / 65535.0f) - myf8b;
+		data.vecPosition.fY = myf16b * (usY / 65535.0f) - myf8b;
+		data.vecPosition.fZ = static_cast < float > (usZ) - 110.0f;
+		return true;
+	}
 
-    void Write ( NetBitStreamInterface& bitStream ) const
-    {
-        float fX = SharedUtil::Clamp ( -8192.0f, data.vecPosition.fX, 8192.0f );
-        float fY = SharedUtil::Clamp ( -8192.0f, data.vecPosition.fY, 8192.0f );
-        float fZ = SharedUtil::Clamp ( -110.0f, data.vecPosition.fZ, 2048.0f - 110.0f );
+	void Write(NetBitStreamInterface& bitStream) const
+	{
+		float fX = SharedUtil::Clamp(-myf8b, data.vecPosition.fX, myf8b);
+		float fY = SharedUtil::Clamp(-myf8b, data.vecPosition.fY, myf8b);
+		float fZ = SharedUtil::Clamp(-110.0f, data.vecPosition.fZ, 2048.0f - 110.0f);
 
-        unsigned short usX = static_cast < unsigned short > ( ((fX + 8192.0f) / 16384.0f) * 65535.0f );
-        unsigned short usY = static_cast < unsigned short > ( ((fY + 8192.0f) / 16384.0f) * 65535.0f );
-        unsigned short usZ = static_cast < unsigned short > ( fZ + 110.0f );
+		unsigned short usX = static_cast < unsigned short > (((fX + myf8b) / myf16b) * 65535.0f);
+		unsigned short usY = static_cast < unsigned short > (((fY + myf8b) / myf16b) * 65535.0f);
+		unsigned short usZ = static_cast < unsigned short > (fZ + 110.0f);
 
-        bitStream.Write ( usX );
-        bitStream.Write ( usY );
-        bitStream.WriteBits ( reinterpret_cast<const char*>(&usZ), 11 );
-    }
+		bitStream.Write(usX);
+		bitStream.Write(usY);
+		bitStream.WriteBits(reinterpret_cast<const char*>(&usZ), 11);
+	}
 
-    struct
-    {
-        CVector vecPosition;
-    } data;
+	struct
+	{
+		CVector vecPosition;
+	} data;
 };
 
 //////////////////////////////////////////
@@ -384,57 +391,57 @@ struct SLowPrecisionPositionSync : public ISyncStructure
 //////////////////////////////////////////
 struct SRotationDegreesSync : public ISyncStructure
 {
-    SRotationDegreesSync ( bool bUseFloats = false ) : m_bUseFloats ( bUseFloats ) {}
+	SRotationDegreesSync(bool bUseFloats = false) : m_bUseFloats(bUseFloats) {}
 
-    bool Read ( NetBitStreamInterface& bitStream )
-    {
-        if ( m_bUseFloats )
-        {
-            return bitStream.Read ( data.vecRotation.fX ) &&
-                   bitStream.Read ( data.vecRotation.fY ) &&
-                   bitStream.Read ( data.vecRotation.fZ );
-        }
-        else
-        {
-            unsigned short usRx;
-            unsigned short usRy;
-            unsigned short usRz;
+	bool Read(NetBitStreamInterface& bitStream)
+	{
+		if (m_bUseFloats)
+		{
+			return bitStream.Read(data.vecRotation.fX) &&
+				bitStream.Read(data.vecRotation.fY) &&
+				bitStream.Read(data.vecRotation.fZ);
+		}
+		else
+		{
+			unsigned short usRx;
+			unsigned short usRy;
+			unsigned short usRz;
 
-            if ( bitStream.Read ( usRx ) && bitStream.Read ( usRy ) && bitStream.Read ( usRz ) )
-            {
-                data.vecRotation.fX = usRx * ( 360.f / 65536.f );
-                data.vecRotation.fY = usRy * ( 360.f / 65536.f );
-                data.vecRotation.fZ = usRz * ( 360.f / 65536.f );
-                return true;
-            }
-        }
+			if (bitStream.Read(usRx) && bitStream.Read(usRy) && bitStream.Read(usRz))
+			{
+				data.vecRotation.fX = usRx * (360.f / 65536.f);
+				data.vecRotation.fY = usRy * (360.f / 65536.f);
+				data.vecRotation.fZ = usRz * (360.f / 65536.f);
+				return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    void Write ( NetBitStreamInterface& bitStream ) const
-    {
-        if ( m_bUseFloats )
-        {
-            bitStream.Write ( data.vecRotation.fX );
-            bitStream.Write ( data.vecRotation.fY );
-            bitStream.Write ( data.vecRotation.fZ );
-        }
-        else
-        {
-            unsigned short usRx = static_cast < unsigned short > ( data.vecRotation.fX * ( 65536 / 360.f ) );
-            unsigned short usRy = static_cast < unsigned short > ( data.vecRotation.fY * ( 65536 / 360.f ) );
-            unsigned short usRz = static_cast < unsigned short > ( data.vecRotation.fZ * ( 65536 / 360.f ) );
-            bitStream.Write ( usRx );
-            bitStream.Write ( usRy );
-            bitStream.Write ( usRz );
-        }
-    }
+	void Write(NetBitStreamInterface& bitStream) const
+	{
+		if (m_bUseFloats)
+		{
+			bitStream.Write(data.vecRotation.fX);
+			bitStream.Write(data.vecRotation.fY);
+			bitStream.Write(data.vecRotation.fZ);
+		}
+		else
+		{
+			unsigned short usRx = static_cast < unsigned short > (data.vecRotation.fX * (65536 / 360.f));
+			unsigned short usRy = static_cast < unsigned short > (data.vecRotation.fY * (65536 / 360.f));
+			unsigned short usRz = static_cast < unsigned short > (data.vecRotation.fZ * (65536 / 360.f));
+			bitStream.Write(usRx);
+			bitStream.Write(usRy);
+			bitStream.Write(usRz);
+		}
+	}
 
-    struct
-    {
-        CVector vecRotation;
-    } data;
+	struct
+	{
+		CVector vecRotation;
+	} data;
 
 private:
     bool m_bUseFloats;
