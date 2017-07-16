@@ -17,9 +17,13 @@
 // Limits for MTA
 #define MAX_VEHICLES_MTA                    64          // Real limit is 110
 #define MAX_PEDS_MTA                        110         // Real limit is 140
-#define MAX_OBJECTS_MTA                     1000        // Real limit is 1200
-#define MAX_ENTRY_INFO_NODES_MTA            72000       // Real limit is 72600  ( MAX_OBJECTS_MTA * 72 ) [Large col models are the cause of high usage]
-#define MAX_POINTER_SINGLE_LINKS_MTA        65000       // Real limit is 70000
+//Platinum Edit - 12.1
+#define MAX_OBJECTS_MTA                     30000        // Real limit is 1200
+#define MAX_ENTRY_INFO_NODES_MTA            100000       // Real limit is 72600  ( MAX_OBJECTS_MTA * 72 ) [Large col models are the cause of high usage]
+#define MAX_POINTER_SINGLE_LINKS_MTA        200000       // Real limit is 70000
+//#define MAX_OBJECTS_MTA                     1000        // Real limit is 1200
+//#define MAX_ENTRY_INFO_NODES_MTA            72000       // Real limit is 72600  ( MAX_OBJECTS_MTA * 72 ) [Large col models are the cause of high usage]
+//#define MAX_POINTER_SINGLE_LINKS_MTA        65000       // Real limit is 70000
 #define MAX_POINTER_DOUBLE_LINKS_MTA        74000       // Real limit is 74800  ( MAX_OBJECTS_MTA * 72 + 2000 )
 
 // Real limits for GTA
