@@ -1153,6 +1153,7 @@ struct CStreamingInfo
 
 CStreamingInfo* GetStreamingInfoFromModelId( uint id )
 {
+	//Platinum Edit:
 	CStreamingInfo* pItemInfo = *(CStreamingInfo**)(0x408ADA + 3);
 	return pItemInfo + id;
 }
