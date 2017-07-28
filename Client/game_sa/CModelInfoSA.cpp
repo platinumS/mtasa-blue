@@ -672,6 +672,7 @@ void CModelInfoSA::StaticFlushPendingRestreamIPL ( void )
                 // Log info
                 OutputDebugString ( SString ( "Entity 0x%08x (with model %d) at ARRAY_StreamSectors[%d,%d] is invalid\n", pEntity, pEntity->m_nModelIndex, i / 2 % NUM_StreamSectorRows, i / 2 / NUM_StreamSectorCols ) );
                 // Assert in debug
+                #if MTA_DEBUG
                     assert ( pEntity->vtbl->DeleteRwObject == 0x00534030 );
                 #endif
                 pSectorEntry = (DWORD *)pSectorEntry [ 1 ];
@@ -914,6 +915,8 @@ void CModelInfoSA::SetCustomCarPlateText ( const char * szText )
         pop     ecx
     }
 
+    if (szText)
+        strncpy(szStoredText, szText, 8);
     else
         szStoredText[0] = 0;
 }
